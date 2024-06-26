@@ -216,7 +216,7 @@ router.delete('/deleteProduct/:id', async (req: Request, res: Response) => {
             });
         }
 
-        products.splice(productIndex, 1); // Use splice to remove the product
+        products.splice(productIndex, 1);
 
         // deleting the product from the cache as well
         const productKey = `product:${pid}`;
