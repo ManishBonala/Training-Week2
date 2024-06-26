@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express';
+import express, {Request, Response, NextFunction} from 'express';
 import redisClient from '../redisClient';
 
 interface product{
@@ -21,21 +21,39 @@ let products : product[] = [{ id: 1, name: 'Smartphone X1', price: 699, descript
 
 const router = express.Router();
 
-router.post('/createProduct',(req : Request, res : Response)=>{
+function inputValidator(req : Request, res : Response, next : NextFunction){
+    const { id, name, price, description } = req.body;
+
+    // Input validations
+    if (!id || !name || !price || !description) {
+        return res.status(400).json({
+            message: "Missing fields!!"
+        });
+    }
+
+    // Type checks
+    if (typeof id !== 'number' || typeof name !== 'string' || typeof price !== 'number' || typeof description !== 'string') {
+        return res.status(400).json({
+            message: "Failed to insert the document. Invalid types provided."
+        });
+    }
+
+    next();
+}
+
+router.post('/createProduct',inputValidator, (req : Request, res : Response)=>{
     try{
-        const id : number = req.body.id;
-        const name : string = req.body.name;
-        const price : number = req.body.price;
-        const description : string = req.body.description;
+        const {id,name, price, description}  = req.body;
     
         const item : product = {
             id,
-            name,
+            name : name.trim(),
             price,
-            description
+            description : description.trim()
         } 
 
         products.push(item);
+
         res.status(200).json({
             ItemInserted : item,
             message : "Product Inserted Successfully"
@@ -184,6 +202,8 @@ router.delete('/deleteProduct/:id', async (req: Request, res: Response)=>{
 router.delete('/deleteProduct/:id', async (req: Request, res: Response) => {
     try {
         const pid: number = parseInt(req.params.id, 10);
+        
+        //check for NaN values
         if (isNaN(pid)) {
             throw new Error("The id is not a valid number");
         }
