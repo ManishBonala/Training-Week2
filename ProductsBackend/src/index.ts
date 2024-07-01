@@ -4,8 +4,8 @@ import productRoutes from './routes/productRoutes';
 const app = express();
 
 app.use(express.json());
-app.use('/api', productRoutes);
+app.use('/api/products', productRoutes);
 
-app.listen(3000, ()=>{
+app.listen(5000, ()=>{
     console.log("server is up and running");
 });
